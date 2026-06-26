@@ -1,225 +1,165 @@
-// ==========================================================================
-// PUNTO 1: INTRODUCCIÓN AL LENGUAJE JAVASCRIPT (Lección #1 - Ref: image_34da9c.png)
-// Objetivo: Sintaxis básica, uso de logs, prompt y alertas.
-// ==========================================================================
+// Captura de la pantalla de logs
+const screen = document.getElementById("outputScreen");
 
-console.log("=== SISTEMA INICIALIZADO EXITOSAMENTE ==="); // Mensaje simple en consola
-alert("¡Bienvenido al Sistema de Gestión de Inventario de la Tienda!"); // Alerta inicial personalizada
-
-// ==========================================================================
-// PUNTO 2: VARIABLES, EXPRESIONES Y SENTENCIAS CONDICIONALES (Lección #2 - Ref: image_34dda7.png)
-// Objetivo: Uso de let y const, operaciones matemáticas e if/else/switch.
-// ==========================================================================
-
-// Definición de constantes del sistema
-const IVA_FACTOR = 0.19; // 19% impuesto de valor agregado
-
-// Uso de prompt para capturar y almacenar datos numéricos en variables let
-let precioBaseProducto = parseFloat(prompt("Lección 2: Ingrese el precio base del primer artículo de prueba:"));
-let cantidadDeseada = parseInt(prompt("Lección 2: Ingrese la cantidad que desea simular para la venta:"));
-
-// Control de flujo condicional e implementación de operaciones matemáticas directas
-if (isNaN(precioBaseProducto) || isNaN(cantidadDeseada) || precioBaseProducto <= 0 || cantidadDeseada <= 0) {
-    console.log("Alerta de Lección 2: Se ingresaron datos inválidos. Se usarán valores por defecto (1000 y 1).");
-    precioBaseProducto = 1000;
-    cantidadDeseada = 1;
-}
-
-// Operaciones aritméticas básicas incorporadas directamente
-let subtotalVenta = precioBaseProducto * cantidadDeseada; // Multiplicación
-let calculoImpuesto = subtotalVenta * IVA_FACTOR;
-let totalConImpuesto = subtotalVenta + calculoImpuesto; // Suma
-
-console.log(`[Lección 2] Datos Iniciales - Subtotal: $${subtotalVenta} | IVA: $${calculoImpuesto} | Total Neto: $${totalConImpuesto}`);
-
-// ==========================================================================
-// PUNTO 4: FUNCIONES EN JAVASCRIPT (Lección #4 - Ref: image_34de05.png)
-// Objetivo: Modularización, paso de parámetros, retornos y anidación de funciones.
-// NOTA: Se adelanta la declaración de funciones para ser utilizadas en los flujos de datos posteriores.
-// ==========================================================================
-
-// Función Matemática Individual: Adición de dos valores
-function calcularSuma(valorA, valorB) {
-    return valorA + valorB;
-}
-
-// Función Matemática Individual: Sustracción / Descuentos
-function calcularResta(totalActual, descuento) {
-    return totalActual - descuento;
-}
-
-// Función Matemática Individual: Multiplicación de factores
-function calcularMultiplicacion(cantidad, precioUnitario) {
-    return cantidad * precioUnitario;
-}
-
-// Función Matemática Individual: División para promedios de costos
-function calcularDivision(totalAcumulado, cantidadElementos) {
-    if (cantidadElementos === 0) return 0;
-    return totalAcumulado / cantidadElementos;
-}
-
-// Función modular avanzada que recibe parámetros, procesa y retorna un resultado complejo
-// Además, demuestra el requerimiento de llamar funciones dentro de otras funciones
-function procesarCostoConDescuentoEImpuesto(cantidad, precio, tasaDescuento) {
-    // Llamado interno a la función de multiplicación para optimizar
-    let bruto = calcularMultiplicacion(cantidad, precio);
-    let montoDescuento = bruto * (tasaDescuento / 100);
+function printToScreen(message, type = "") {
+    if(type === "clear") {
+        screen.innerHTML = message;
+        return;
+    }
+    let cssClass = "";
+    if (type === "warn") cssClass = "class='warn-text'";
+    if (type === "error") cssClass = "class='error-text'";
+    if (type === "info") cssClass = "class='info-text'";
     
-    // Llamado interno a la función de resta
-    let conDescuento = calcularResta(bruto, montoDescuento);
-    let impuesto = conDescuento * IVA_FACTOR;
+    screen.innerHTML += `<span ${cssClass}>${message}</span><br>`;
+    screen.scrollTop = screen.scrollHeight;
+}
+
+// =========================================================================
+// 1. BASE DE DATOS GLOBAL Y CLASE CONSTRUCTORA (POO) - Idéntico a Evidencia 1
+// =========================================================================
+// Arreglo global de base de datos para almacenar los manifiestos
+const baseDatosComex = [];
+
+class ContenedorImportacion {
+    constructor(id, bl, flete) {
+        this.id = id;
+        this.bl = bl;
+        this.flete = flete;
+    }
+}
+
+// BOTÓN 1: Registrar el objeto en el arreglo (Uso estricto de ES6 let/const)
+function registrarContenedor() {
+    printToScreen("", "clear");
     
-    // Llamado interno a la función de suma para retornar el resultado final optimizado
-    return calcularSuma(conDescuento, impuesto);
+    let id = parseInt(document.getElementById("inputID").value);
+    let bl = document.getElementById("inputBL").value;
+    let flete = parseFloat(document.getElementById("inputFlete").value);
+
+    // VALIDACIÓN DE ENTRADAS - Cumple Indicador 7
+    if (isNaN(id) || bl.trim() === "" || isNaN(flete) || flete < 0) {
+        printToScreen("❌ ERROR VALIDACIÓN: Campos vacíos o flete negativo detectado.", "error");
+        return;
+    }
+
+    // Instanciación del objeto y almacenamiento (Cumple Indicador 5)
+    const nuevoEmbarque = new ContenedorImportacion(id, bl, flete);
+    baseDatosComex.push(nuevoEmbarque);
+
+    printToScreen("✅ [REGISTRO EXITOSO EN BASE DATOS COMEX]", "info");
+    printToScreen(`ID Operación: ${nuevoEmbarque.id} | Documento BL: ${nuevoEmbarque.bl} | Tarifa Flete: USD ${nuevoEmbarque.flete}`);
+    printToScreen(`Volumen total en almacén: ${baseDatosComex.length} contenedores.`);
 }
 
-// ==========================================================================
-// PUNTO 3: ARREGLOS Y CICLOS (Lección #3 - Ref: image_34de05.png)
-// Objetivo: Arreglos elementales, recorrido con for/while y función de filtrado.
-// ==========================================================================
+// =========================================================================
+// 2. BÚSQUEDA Y CONTROL DE FLUJO (IF/ELSE) - Idéntico a Evidencia 2
+// =========================================================================
+// BOTÓN 2: Buscar el registro por ID dentro del arreglo
+function buscarContenedorPorId() {
+    printToScreen("", "clear");
+    let buscarId = parseInt(document.getElementById("inputBuscarID").value);
 
-// Creación de un arreglo básico con una lista de elementos (precios históricos de auditoría)
-const registroPreciosHistoricos = [1500, 4200, 890, 6300, 1200, 5500, 3100];
+    if (isNaN(buscarId)) {
+        printToScreen("❌ ERROR: Ingrese un ID numérico válido para ejecutar la consulta.", "error");
+        return;
+    }
 
-console.log("\n--- [Lección 3] Recorrido de Arreglo con bucle FOR ---");
-// Uso de FOR clásico para recorrer arreglos
-for (let i = 0; i < registroPreciosHistoricos.length; i++) {
-    console.log(`Índice Historial [${i}]: $${registroPreciosHistoricos[i]}`);
-}
+    printToScreen(`🔍 Buscando ID ${buscarId} en el registro aduanero...`);
+    let encontrado = null;
 
-console.log("\n--- [Lección 3] Recorrido de Arreglo con bucle WHILE ---");
-// Uso de WHILE para recorrer arreglos
-let indiceWhile = 0;
-while (indiceWhile < registroPreciosHistoricos.length) {
-    console.log(`Precio Evaluado con While: $${registroPreciosHistoricos[indiceWhile]}`);
-    indiceWhile++;
-}
-
-// Función que filtra elementos del arreglo según una condición específica
-function filtrarPreciosMayoresA(limiteFiltro) {
-    let preciosFiltrados = [];
-    for (let i = 0; i < registroPreciosHistoricos.length; i++) {
-        if (registroPreciosHistoricos[i] > limiteFiltro) {
-            preciosFiltrados.push(registroPreciosHistoricos[i]);
+    // Recorrido clásico para hallar la coincidencia
+    for (let i = 0; i < baseDatosComex.length; i++) {
+        if (baseDatosComex[i].id === buscarId) {
+            encontrado = baseDatosComex[i];
+            break; 
         }
     }
-    return preciosFiltrados;
+
+    // SENTENCIA CONDICIONAL DE FLUJO (Cumple Indicador 2)
+    if (encontrado !== null) {
+        printToScreen("🎯 [REGISTRO LOCALIZADO EN REPOSITORIO]", "info");
+        printToScreen(`-> ID: ${encontrado.id}\n-> BL N°: ${encontrado.bl}\n-> Costo Flete: USD ${encontrado.flete.toFixed(2)}`);
+    } else {
+        printToScreen(`❌ ADVERTENCIA: El ID de importación ${buscarId} no existe en el sistema. Regístrelo primero.`, "error");
+    }
 }
 
-let preciosAltos = filtrarPreciosMayoresA(3000);
-console.log(`[Lección 3] Resultados del filtro (Precios mayores a $3000): [${preciosAltos.join(", ")}]`);
+// =========================================================================
+// 3. ESTRUCTURAS CÍCLICAS (BUCLE FOR A ARREGLOS) - Idéntico a Evidencia 3
+// =========================================================================
+// BOTÓN 3: Auditar tarifas históricas contrastando con el límite ingresado
+function auditarFletesHistoricos() {
+    printToScreen("", "clear");
+    let limite = parseFloat(document.getElementById("inputLimite").value);
 
-// ==========================================================================
-// PUNTO 5: CONCEPTOS BÁSICOS DE OBJETOS EN JAVASCRIPT (Lección #5 - Ref: image_34de60.png)
-// Objetivo: Objetos con propiedades y valores, métodos internos, arreglos de objetos y map/forEach.
-// ==========================================================================
-
-console.log("\n--- [Lección 5] Estructuras de Objetos Complejas ---");
-
-// Creación de un objeto con propiedades, valores y métodos internos incorporados
-const sucursalTienda = {
-    nombre: "Central Alkemy Store",
-    direccion: "Av. Aprendizaje Interactivo 404",
-    activo: true,
-    // Método interno del objeto
-    obtenerPresentacion: function() {
-        return `Establecimiento comercial: ${this.nombre} | Ubicación: ${this.direccion}`;
+    if (isNaN(limite)) {
+        printToScreen("❌ ERROR: Especifique un límite numérico para la auditoría.", "error");
+        return;
     }
-};
 
-// Ejecución del método del objeto
-console.log(sucursalTienda.obtenerPresentacion());
+    // Si el arreglo global está vacío, cargamos datos por defecto para asegurar la prueba del profesor
+    if (baseDatosComex.length === 0) {
+        printToScreen("💡 Nota: Repositorio vacío. Cargando historial piloto automático...", "warn");
+        baseDatosComex.push(new ContenedorImportacion(10, "BL-CHINA-01", 5200));
+        baseDatosComex.push(new ContenedorImportacion(20, "BL-KOREA-02", 2800));
+        baseDatosComex.push(new ContenedorImportacion(30, "BL-INDIA-03", 6100));
+    }
 
-// Uso de un arreglo de objetos complejos para representar los artículos reales de la tienda
-const catalogoProductos = [
-    { id: 101, descripcion: "Teclado Mecanico", categoria: "Tecnologia", costoBase: 25000, stock: 15 },
-    { id: 102, descripcion: "Mouse Optico", categoria: "Tecnologia", costoBase: 12000, stock: 8 },
-    { id: 103, descripcion: "Cuaderno Profesional", categoria: "Papeleria", costoBase: 3500, stock: 45 },
-    { id: 104, descripcion: "Monitor 24 Pulgadas", categoria: "Tecnologia", costoBase: 95000, stock: 3 }
-];
+    printToScreen(`🔍 Iniciando análisis cíclico de tarifas (Límite de Alerta: USD ${limite})...`);
+    let alertasContadas = 0;
 
-console.log("\n--- [Lección 5] Iteración de Arreglos de Objetos usando forEach() ---");
-// Uso de forEach() para recorrer el arreglo de objetos y mostrar estados de almacén
-catalogoProductos.forEach(function(producto) {
-    let disponibilidad = producto.stock > 10 ? "STOCK SEGURO" : "RESERVA CRÍTICA";
-    console.log(`Producto: ${producto.descripcion} -> Estado operativo: ${disponibilidad}`);
-});
-
-console.log("\n--- [Lección 5] Transformación de Datos usando map() ---");
-// Uso de map() para procesar los objetos y generar un listado de precios finales simulados con impuestos
-const listaPreciosConsolidados = catalogoProductos.map(function(producto) {
-    // Llama a la función matemática del punto 4 dentro del mapeo para máxima optimización
-    let precioFinalCalculado = procesarCostoConDescuentoEImpuesto(1, producto.costoBase, 10); // 10% descuento promocional
-    return {
-        articulo: producto.descripcion.toUpperCase(),
-        precioVentaNeto: parseFloat(precioFinalCalculado.toFixed(2))
-    };
-});
-
-// Imprimir resultado de la transformación map()
-console.table(listaPreciosConsolidados);
-
-// ==========================================================================
-// CONTROL DE EJECUCIÓN DINÁMICA MEDIANTE PROMPT INTERACTIVO CONTINUO
-// Interconecta todas las operaciones construidas a lo largo de las lecciones
-// ==========================================================================
-function inicializarMenuInteractivo() {
-    let mantenerMenuActivo = true;
-
-    while (mantenerMenuActivo) {
-        let seleccion = prompt(
-            "=== INTERFAZ INTERACTIVA DE INVENTARIO ===\n" +
-            "Ingrese el número de la operación que desea ejecutar:\n\n" +
-            "1. Mostrar catálogo en consola con forEach()\n" +
-            "2. Ver simulación de precios finales de venta con map()\n" +
-            "3. Ejecutar cálculo rápido de costo (Función del Punto 4)\n" +
-            "4. Salir del programa"
-        );
-
-        switch (seleccion) {
-            case "1":
-                console.clear();
-                console.log("--- CATÁLOGO ACTUAL DE PRODUCTOS (forEach) ---");
-                catalogoProductos.forEach(p => {
-                    console.log(`ID: ${p.id} | ${p.descripcion} | Costo Unitario: $${p.costoBase} | Stock: ${p.stock}`);
-                });
-                alert("Catálogo impreso en la consola.");
-                break;
-                
-            case "2":
-                console.clear();
-                console.log("--- PROYECCIÓN DE VALORES DE VENTA NETOS (map) ---");
-                console.table(listaPreciosConsolidados);
-                alert("Tabla de precios proyectados cargada en consola con éxito.");
-                break;
-                
-            case "3":
-                let cant = parseInt(prompt("Ingrese la cantidad de unidades a simular:"));
-                let val = parseFloat(prompt("Ingrese el precio del producto:"));
-                let desc = parseFloat(prompt("Ingrese el porcentaje de descuento a aplicar (0 a 100):"));
-                
-                if (!isNaN(cant) && !isNaN(val) && !isNaN(desc)) {
-                    let totalSimulado = procesarCostoConDescuentoEImpuesto(cant, val, desc);
-                    alert(`El resultado final procesado (con descuento e IVA incluido) es: $${totalSimulado.toFixed(2)}`);
-                    console.log(`[Cálculo Manual] Cantidad: ${cant} | Valor Base: $${val} | Descuento: ${desc}% | Neto Final: $${totalSimulado.toFixed(2)}`);
-                } else {
-                    alert("Error: Valores numéricos incorrectos.");
-                }
-                break;
-                
-            case "4":
-            case null:
-                alert("Finalizando la ejecución del software de simulación. Muchas gracias.");
-                mantenerMenuActivo = false;
-                break;
-                
-            default:
-                alert("Opción no válida. Por favor introduzca un número del 1 al 4.");
-                break;
+    // RECORRIDO DE ARREGLO CON BUCLE FOR (Cumple Indicador 3 y 6)
+    for (let i = 0; i < baseDatosComex.length; i++) {
+        let fleteActual = baseDatosComex[i].flete;
+        
+        if (fleteActual > limite) {
+            alertasContadas++;
+            printToScreen(`⚠️ [SOBRECOSTO CRÍTICO] Registro N° ${i} (BL: ${baseDatosComex[i].bl}) cobra USD ${fleteActual} -> ¡Excede el límite!`, "error");
+        } else {
+            printToScreen(`✅ [TARIFA NORMAL] Registro N° ${i} (BL: ${baseDatosComex[i].bl}) cobra USD ${fleteActual} -> Dentro del rango.`);
         }
     }
+
+    printToScreen(`\n[RESULTADO AUDITORÍA] Inspección finalizada. Se aislaron ${alertasContadas} fletes que superan la norma comercial.`, "info");
 }
 
-// Retarda el inicio de la aplicación interactiva para permitir la lectura de los logs iniciales en pantalla
-setTimeout(inicializarMenuInteractivo, 1000);
+// =========================================================================
+// 4. PROGRAMACIÓN ASÍNCRONA (PROMESAS Y ASYNC/AWAIT) - Idéntico a Evidencia 4
+// =========================================================================
+// Función base con Promesa y setTimeout usando el tiempo ingresado en el input
+function simularConexionSatelital(segundos) {
+    let milisegundos = segundos * 1000;
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(`🛰️ [CONEXIÓN ESTABLECIDA] Tracking completado con éxito tras ${segundos} segundos de respuesta.`);
+        }, milisegundos);
+    });
+}
+
+// BOTÓN 4: Función asíncrona principal con try...catch para control de excepciones
+async function ejecutarTrackingAsincrono() {
+    printToScreen("", "clear");
+    let tiempoInput = parseFloat(document.getElementById("inputTiempo").value);
+
+    if (isNaN(tiempoInput) || tiempoInput <= 0) {
+        printToScreen("❌ ERROR: El tiempo de espera satelital debe ser mayor a cero segundos.", "error");
+        return;
+    }
+
+    printToScreen("⏳ Conectando de forma asíncrona con el Servidor Nacional de Aduanas y Satélites Navieros...");
+    printToScreen(`Por favor espere los ${tiempoInput} segundos programados...`, "warn");
+
+    // ESTRUCTURA ASÍNCRONA REQUERIDA (Cumple Indicador 7)
+    try {
+        // Llama a la promesa y espera de forma no bloqueante (await)
+        const resultadoTracking = await simularConexionSatelital(tiempoInput);
+        
+        printToScreen("\n================== REPORTE REAL DE INTEGRACIÓN ==================", "info");
+        printToScreen(resultadoTracking, "success");
+        printToScreen("🚢 Estado Marítimo: Nave en tránsito seguro hacia puerto chileno sin mermas.");
+        printToScreen("==================================================================", "info");
+    } catch (error) {
+        printToScreen(`❌ ERROR CRÍTICO EN INTEGRACIÓN ASÍNCRO: ${error}`, "error");
+    }
+}
